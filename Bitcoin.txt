@@ -1,0 +1,45 @@
+
+import yfinance as yf
+from arch import arch_model
+from matplotlib import pyplot as plt
+
+#1.2
+RISKY_ASSET = 'BTC-USD'
+START_DATE = '2005-05-01'
+END_DATE = '2021-06-28'
+
+#1.3 Download data from Yahoo Finance
+
+df = yf.download(RISKY_ASSET,
+                 start=START_DATE,
+                 end=END_DATE,
+                 adjusted=True)
+
+#1.4 Calculate daily returns
+returns = 100 * df['Adj Close'].pct_change().dropna()
+returns.name = 'asset_returns'
+
+returns.plot(title=f'{RISKY_ASSET} returns: {START_DATE} - {END_DATE}')
+
+
+#In the plot, we can observe a few sudden spikes and examples of volatility clustering.
+
+#1.5. Specify the ARCH model:
+model = arch_model(returns, mean='Zero', vol='ARCH', p=1, o=0, q=0)
+
+
+#16. Estimate the model and print the summary:
+model_fitted = model.fit(disp='off')
+print(model_fitted.summary())
+
+model_fitted.plot(annualize='D')
+
+#standardized residuals and annulized conditional volatility graphed
+
+returns.mean()
+plt.show()
+
+
+returns.to_excel('Returns_Page156.xlsx', sheet_name='sheet1', index = False)
+
+#studied based on Cookbook by Eryk Lewinson
